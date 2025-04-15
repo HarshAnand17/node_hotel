@@ -18,6 +18,21 @@ router.post('/',async (req,res)=>{
     }
 })
 //get method to get the menu items
+
+//get method to get the person
+router.get('/',async (req,res)=>{
+  try{
+      const data=await MenuItem.find();
+      console.log('data fetched');
+      res.status(200).json(data)
+  }
+  catch(err) {
+    console.log(err);
+    res.status(500).json({error:'Internal Server Error'});
+  }
+})
+
+
 router.get('/:DishType',async (req,res)=>{
   try{
     const DishType=req.params.DishType;//Extract the work type from the URL parameter
