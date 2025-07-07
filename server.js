@@ -47,6 +47,9 @@
 
 //  console.log(p.isString(2));
 
+
+
+
 //const jsonString='{"name":"john","age":30,"city":"new york"}';
 // const jsonObject=JSON.parse(jsonString);
 // console.log(jsonObject.name);
@@ -63,19 +66,33 @@
 
 const express = require('express')
 const app = express()
+//db is the database connection file
 const db=require('./db')
+//for security purpose
 require('dotenv').config();
-const PORT=process.env.PORT || 3000
-
+const passport=require('./auth')
+//const Person=require('./models/Person')
+//body-parser is used to parse the incoming request bodies in a middleware before your handlers,available under the req.body property
 const bodyParser=require('body-parser');
 app.use(bodyParser.json()) //req.body main store karega
 
+
+//middleware function
+const logRequest=(req,res,next)=>{
+  console.log(`[${new Date().toLocaleString()}] Request Made to : ${req.originalUrl}`);
+  next();//Move to the next phase
+}
+app.use(logRequest);
+
+//passport use for authentication 
+app.use(passport.initialize());
+const localAutMiddleware=passport.authenticate('local',{session:false})
+app.get('/' ,function (req, res) {
+  res.send('welcome to our hotel')
+})
 const Person=require('./models/Person');
 const MenuItem=require('./models/MenuItem')
 
-app.get('/', function (req, res) {
-  res.send('welcome to website how can i help you')
-})
 // app.get('/chicken',(req,res)=>{
 //      res.send('sure sir,i would love to serve the chicken')
 // })
@@ -89,14 +106,14 @@ app.get('/', function (req, res) {
 //      res.send(customized_idli)
 // })
 
-
-
 //import the router files
 const personRoute=require('./routes/personRoutes');
-const MenuItemRoute=require('./routes/menuItemRoutes')
+const MenuItemRoute=require('./routes/menuItemRoutes');
 //use the routers
 app.use('/person',personRoute)
-app.use('/menu',MenuItemRoute)
+app.use('/menu',localAutMiddleware,MenuItemRoute)
+
+const PORT=process.env.PORT || 3000
 app.listen(PORT,()=>{
   console.log('listening on port 3000');
 })//
